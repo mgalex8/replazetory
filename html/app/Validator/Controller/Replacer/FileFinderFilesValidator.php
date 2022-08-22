@@ -31,6 +31,12 @@ class FileFinderFilesValidator extends AbstractValidator implements IValidatorIn
                     ])
                 ),
             ],
+            'page' => [
+                new Assert\Optional(),
+            ],
+            'limit' => [
+                new Assert\Optional(),
+            ],
         ]);
     }
 

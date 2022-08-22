@@ -1,8 +1,10 @@
 <?php
 namespace App\Controller\Replacer;
 
+use Knp\Component\Pager\Paginator;
 use App\Bundle\Plates\Plate;
 use App\Bundle\Plates\PlateView;
+use App\Serializer\Pagination\PaginationResultSerializer;
 use App\Service\FileFinder\FileFinder;
 use App\Validator\Controller\Replacer\FileFinderFilesValidator;
 use Symfony\Component\Filesystem\Path;
@@ -69,16 +71,22 @@ class FileFinderController extends AbstractController
 
         $path = ABS_PATH . \DIRECTORY_SEPARATOR . ltrim($request->get('dir'), ABS_PATH);
         $sort = $request->get('sort') ?: null;
+        $page = $request->get('page') ?: 1;
+        $limit = $request->get('limit') ?: 200;
 
         $fileFinder = new FileFinder();
         $files = $fileFinder->findFiles($path, '/\.html/', $sort);
 
-        $dataFiles = [];
+        $filesList = [];
         foreach ($files as $file) {
-            $dataFiles[] = (string) $file;
+            $filesList[] = (string) $file;
         }
 
-        return new JsonResponse(array('path' => $path, 'files' => $dataFiles));
+        $paginator = new Paginator();
+        $pagination = $paginator->paginate($filesList, $page, 200);
+        $paginationSerializer = new PaginationResultSerializer($pagination);
+
+        return new JsonResponse(array('path' => $path, 'files' => $paginationSerializer->toArray()));
     }
 
     /**
