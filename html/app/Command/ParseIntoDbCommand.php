@@ -165,6 +165,9 @@ class ParseIntoDbCommand extends Command
         if (! $content_id) {
             $htmlParser = new HtmlParser();
             $htmlParser->extractDocument($filepath);
+            if (empty(trim($htmlParser->getHtml()))) {
+                throw new \Exception(sprintf('File %s not open', $filepath));
+            }
             $xp = new \DOMXPath($htmlParser->dom());
             foreach ($this->configuration as $key => $config) {
                 $processing = !isset($config['processing']) || $config['processing'] == 'true' ? true : false;
@@ -201,9 +204,6 @@ class ParseIntoDbCommand extends Command
                             /** apply replacers **/
                             if (isset($matches['replacers'])) {
                                 foreach ($matches['replacers'] as $replace) {
-                                    if ($item['matches']['xpath'] == '//title') {
-                                        dump($replace);
-                                    }
                                     $found_replacer = preg_match($replace['from'], $content_replacer);
                                     if ($found_replacer) {
                                         $content_replacer = preg_replace($replace['from'], $replace['to'], $content_replacer);
@@ -227,6 +227,7 @@ class ParseIntoDbCommand extends Command
                                 $item_replacers[] = $rpl;
                             }
                         }
+//                        dump($rpl);
 
                         /** save to database **/
                         if (isset($matches['save'])) {

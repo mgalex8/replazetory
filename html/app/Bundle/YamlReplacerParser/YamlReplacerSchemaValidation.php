@@ -99,17 +99,17 @@ class YamlReplacerSchemaValidation
                 foreach ($matches_array as $matches) {
                     $matches_pl[$matchesindex] = $matches;
                     if (! isset($matches['xpath'])) {
-                        throw new ParseException(sprintf('Do not set required parameter `xpath` on %1$s.matches.%2$d, please setup %1$s.matches.%2$d.xpath parameter on yml config', $key, $matchesindex));
+                        throw new ParseException(sprintf('XPath: %1$s Do not set required parameter `xpath` on %2$s.matches.%3$d, please setup %2$s.matches.%3$d.xpath parameter on yml config', $matches['xpath'], $key, $matchesindex));
                     }
                     if (isset($matches['replacers'])) {
                         if (is_array($matches['replacers']) && array_key_exists(0, $matches['replacers'])) {
                             $replindex = 0;
                             foreach ($matches['replacers'] as $repl) {
                                 if (! isset($repl['from'])) {
-                                    throw new ParseException(sprintf('Do not set required parameter `from` on %1$s.matches.%2$d.replacers.%3$d, please setup %1$s.matches.%2$d.replacers.%3$d.from parameter on yml config', $key, $matchesindex, $replindex));
+                                    throw new ParseException(sprintf('XPath: %1$s Do not set required parameter `from` on %2$s.matches.%3$d.replacers.%4$d, please setup %2$s.matches.%3$d.replacers.%4$d.from parameter on yml config', $matches['xpath'], $key, $matchesindex, $replindex));
                                 }
                                 if (! isset($repl['to'])) {
-                                    throw new ParseException(sprintf('Do not set required parameter `from` on %1$s.matches.%2$d.replacers.%3$d, please setup %1$s.matches.%2$d.replacers.%3$d.to parameter on yml config', $key, $matchesindex, $replindex));
+                                    throw new ParseException(sprintf('XPath: %1$s Do not set required parameter `from` on %2$s.matches.%3$d.replacers.%4$d, please setup %2$s.matches.%3$d.replacers.%4$d.to parameter on yml config', $matches['xpath'], $key, $matchesindex, $replindex));
                                 }
                                 $replindex++;
                             }
@@ -117,10 +117,10 @@ class YamlReplacerSchemaValidation
                         }
                         else {
                             if (! isset($matches['replacers']['from'])) {
-                                throw new ParseException(sprintf('Do not set required parameter `to` on %1$s.matches.%2$d.replacers, please setup %1$s.matches.%2$d.replacers.from parameter on yml config', $key, $matchesindex));
+                                throw new ParseException(sprintf('XPath: %1$s Do not set required parameter `to` on %2$s.matches.%3$d.replacers, please setup %2$s.matches.%3$d.replacers.from parameter on yml config', $matches['xpath'], $key, $matchesindex));
                             }
                             if (! isset($matches['replacers']['to'])) {
-                                throw new ParseException(sprintf('Do not set required parameter `from` on %1$s.matches.%2$d.save, please setup %1$s.matches.%2$d.replacers.to parameter on yml config', $key, $matchesindex));
+                                throw new ParseException(sprintf('XPath: %1$s Do not set required parameter `from` on %2$s.matches.%3$d.save, please setup %2$s.matches.%3$d.replacers.to parameter on yml config', $matches['xpath'], $key, $matchesindex));
                             }
                             $replacers = [ [ 'from' => $matches['replacers']['from'], 'to' => $matches['replacers']['to'] ] ];
                         }
@@ -130,14 +130,14 @@ class YamlReplacerSchemaValidation
                     if (isset($matches['filters'])) {
                         $filters = [];
                         if (! is_array($matches['filters'])) {
-                            throw new ParseException(sprintf('Parameter `filters` on %1$s.matches.%2$d.filters must be type of array, %3$s', $key, $matchesindex, gettype($matches['filters']) == 'object' ? get_class($matches['filters']) : gettype($matches['filters'])));
+                            throw new ParseException(sprintf('XPath: %1$s Parameter `filters` on %2$s.matches.%3$d.filters must be type of array, %4$s', $matches['xpath'], $key, $matchesindex, gettype($matches['filters']) == 'object' ? get_class($matches['filters']) : gettype($matches['filters'])));
                         }
                         $filterindex = 0;
                         foreach ($matches['filters'] as $filter_parameters) {
                             if (is_string($filter_parameters)) {
                                 $filter_name = $filter_parameters;
                                 if (!array_key_exists($filter_name, $all_content_filters)) {
-                                    throw new ParseException(sprintf('Filter `%3$s` not found in class %4$s, check filter names on %1$s.matches.%2$d.filters', $key, $matchesindex, $filter_name, get_class($this)));
+                                    throw new ParseException(sprintf('XPath: %1$s Filter `%4$s` not found in class %5$s, check filter names on %2$s.matches.%3$d.filters', $matches['xpath'], $key, $matchesindex, $filter_name, get_class($this)));
                                 }
                                 $filters[$filter_name] = [];
                             } elseif(is_array($filter_parameters)) {
@@ -145,12 +145,12 @@ class YamlReplacerSchemaValidation
                                     $filter_name = $f_n;
                                     $filter_parameters = $f_opt;
                                     if (!array_key_exists($filter_name, $all_content_filters)) {
-                                        throw new ParseException(sprintf('Filter `%3$s` not found in class %4$s, check filter names on %1$s.matches.%2$d.filters', $key, $matchesindex, $filter_name, get_class($this)));
+                                        throw new ParseException(sprintf('XPath: %1$s Filter `%4$s` not found in class %5$s, check filter names on %2$s.matches.%3$d.filters', $matches['xpath'], $key, $matchesindex, $filter_name, get_class($this)));
                                     }
                                     $filters[$filter_name] = $filter_parameters;
                                 }
                             } else {
-                                throw new ParseException(sprintf('Filter number `%3$s`on %1$s.matches.%2$d.filters.%3$s must be string or array', $key, $matchesindex, $filterindex, get_class($this)));
+                                throw new ParseException(sprintf('XPath: %1$s Filter number `%4$s`on %2$s.matches.%3$d.filters.%4$s must be string or array', $matches['xpath'], $key, $matchesindex, $filterindex, get_class($this)));
                             }
                             $filterindex++;
                         }
@@ -159,7 +159,7 @@ class YamlReplacerSchemaValidation
 
                     if (isset($matches['save'])) {
                         if (! isset($matches['save']['table'])) {
-                            throw new ParseException(sprintf('Do not set required parameter `table` on %1$s.matches.%2$d.save, please setup $1&s.matches.%2$d.save.table parameter on yml config', $key, $matchesindex));
+                            throw new ParseException(sprintf('XPath: %1$s Do not set required parameter `table` on %2$s.matches.%3$d.save, please setup $2&s.matches.%3$d.save.table parameter on yml config', $matches['xpath'], $key, $matchesindex));
                         } else {
                             $table = str_contains($matches['save']['table'], 'sitedumper_') ? $matches['save']['table'] : 'sitedumper_'.$matches['save']['table'];
                             $matches_pl[$matchesindex]['save']['table'] = $table;
@@ -171,7 +171,7 @@ class YamlReplacerSchemaValidation
                                 }
                                 foreach ($matches['save'] as $param => $value) {
                                     if ($param !== 'table' && ! in_array($param, $field_names)) {
-                                        throw new ParseException(sprintf('Parameter `%3$s` on %1$s.matches.%2$d.save not exists in table %4$s, please setup %1$s.matches.%2$d.save.%3$s parameter on yml config', $key, $matchesindex, $param, $table));
+                                        throw new ParseException(sprintf('XPath: %1$s Parameter `%4$s` on %2$s.matches.%3$d.save not exists in table %5$s, please setup %2$s.matches.%3$d.save.%4$s parameter on yml config', $matches['xpath'], $key, $matchesindex, $param, $table));
                                     }
                                 }
                             }
