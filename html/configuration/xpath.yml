@@ -1,0 +1,39 @@
+all:
+  directory: '*'
+  matches: [
+    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+  ]
+  processing: 'false'
+
+categories:
+  directory: /^\/category\/[\d]+(.*?)$/
+  type: category,
+  matches: [
+    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+    { xpath: //*[@class="copyrights"]/a[2], replacers: [ { from: /\"\.\.\/(.*?)/, to: / } ] },
+    { xpath: //h1, save: { type: 'title', table:  'content' } },
+    { xpath: //div[@class="borderdark"], replacers: [ { from: /https\:\/\/extratorrent\.proxyninja\.org\/search(.*?)/, to: \/search%s } ], save: { type: 'recent_search', table:  'content', parent_id: true } },
+    { xpath: //div[@class="tl"]/tbody/tr/td/a, replacers: [ { from: /\"\.\.\/\.\.\//, to: \"/%s } ], save: { type: 'torrent_list', table:  'content'}},
+    { xpath: //div[@class="top_torr"]/div[@class="top_pic"]/tr/td/a, replacers: [ { from: /\"\.\.\/\.\.\/(.*?)/, to: \"\/%s } ], save: { type: 'top_posters', table:  'content'}},
+  ]
+
+torrent:
+  directory: /^\/torrent\/[\d]+(.*?)$/
+  type: post,
+  matches: [
+    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+#    { xpath: //*[@class="copyrights"], replacers: [ { from: /\"\.\.\/(.*?)/, to: \"\/%s } ] },
+    { xpath: //title, filters: [ 'get_text', 'trim' ], replacers: [ { from: '/\s\-\sExtraTorrent\.st/', to: '' }, { from: '/ExtraTorrent\.st/', to: '' } ], save: { name: 'page_title', table:  'additional_fields' } },
+    { xpath: //h1/b, save: { name: 'title', table:  'additional_fields' } },
+    { xpath: //form/@action, replacers: { from: /https\:\/\/extratorrent\.proxyninja\.org\/search(.*?)/, to: /search } },
+    { xpath: //div[@class="borderdark"], filters: [ { get_text: {}, mixer_br_special: { random_others: 1, numbers: [ [0], [3,2,1,0], [7,8,0,1,2,3,4,6,7,9,11,10], [0,1,3,2,5,4] ] } } ], save: { type: 'recent_search', table:  'content', parent_id: true } },
+#    { xpath: //div[@class="borderdark"]/div[@class="bbcode_center"], filters: [ { mixer_br: { trim: 1 } } ], save: { type: 'recent_search', table:  'content', parent_id: true } },
+    { xpath: //div[@class="tl"]/tbody/tr/td/a, replacers: { from: /\"\.\.\/\.\.\//, to: \"\/%s }, save: { type: 'torrent_list', table:  'content'} },
+    { xpath: //div[@class="top_torr"]/div[@class="top_pic"]/tr/td/a, replacers: { from: /\"\.\.\/(.*?)/, to: \"\/%s }, save: { type: 'top_posters', table:  'content'} },
+    { xpath: //table[1]/tbody/tr[3]/td/table[1]/tbody/tr/td[2]/table[1]/tbody/tr/*/a, replacers: { from: /ExtraTorrent\.st/, to: Home }, save: { type: 'category', table:  'content' } },
+  ]
+
+

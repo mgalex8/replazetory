@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+ini_set("memory_limit","2048M");
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+if (!defined('ABS_PATH')) {
+    define('ABS_PATH', __DIR__.'/..');
+}
+
+// Create the Application
+$application = new Symfony\Component\Console\Application;
+
+// Register all Commands
+$application->add(new \App\Command\ParseIntoDbCommand());
+
+// Run it
+$application->run();

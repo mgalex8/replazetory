@@ -1,0 +1,10 @@
+data/
+docker/mysql/data/
+html/_HTML
+html/log
+html/vendor
+html/cache/
+html/node_modules/
+html/var/cache
+.env
+.idea/

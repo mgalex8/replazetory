@@ -1,0 +1,75 @@
+#!/usr/bin/env php
+<?php
+
+/** Function for check DB errors and echo message into console output **/
+function cheack_db_errors_and_echo_message($db, string $table, bool $result, string $query_type = ''): void
+{
+    if (!$result) {
+        throw new \Exception('DATABASE ERROR: '.mysqli_error($db));
+    } else {
+        echo $result
+            ? ($query_type == 'CREATE' ? 'TABLE CREATED' : ($query_type == 'DELETE' ? 'DELETE TABLE' : $query_type)).': '.$table.PHP_EOL
+            : ($query_type == 'CREATE' ? 'CREATE ERROR' : ($query_type == 'DELETE' ? 'DELETE ERROR' : $query_type.' ERROR')).': '.$table.PHP_EOL;
+    }
+}
+
+/** Connect to DB **/
+$db = mysqli_connect("mysql", 'user1', '1234', 'er2night_db');
+if (mysqli_connect_error($db)) {
+    throw new \Exception('DATABASE CONNECTION FAILED: '.mysqli_connect_error($db));
+}
+
+$deletes_queries = [
+    'sitedumper_unusable_urls'      => 'DROP TABLE IF EXISTS `sitedumper_unusable_urls`',
+    'sitedumper_content'            => 'DROP TABLE IF EXISTS `sitedumper_content`',
+    'sitedumper_additional_fields'  => 'DROP TABLE IF EXISTS `sitedumper_additional_fields`',
+    'sitedumper_options'            => 'DROP TABLE IF EXISTS `sitedumper_options`',
+];
+
+$creates_queries = [
+    /** create table `sitedumper_urls` **/
+    'sitedumper_unusable_urls' => "CREATE TABLE IF NOT EXISTS `sitedumper_unusable_urls` (
+        `id` INT PRIMARY KEY AUTO_INCREMENT,
+        `hash` VARCHAR(94) UNIQUE,
+        `url` VARCHAR(1024)
+    )",
+
+    /** create table `sitedumper_content` **/
+    'sitedumper_content' => "CREATE TABLE IF NOT EXISTS `sitedumper_content` (
+        `id` INT PRIMARY KEY AUTO_INCREMENT,
+        `parent_id` INT NULL,
+        `hash` VARCHAR(94) UNIQUE NULL,
+        `url` VARCHAR(1024) NULL,
+        `type` VARCHAR(50) NOT NULL,
+        `content` TEXT NULL,
+        `title` VARCHAR(1024) NULL,
+        `created_at` DATE NULL
+    )",
+
+    /** create table `sitedumper_content` **/
+    'sitedumper_additional_fields' => "CREATE TABLE IF NOT EXISTS `sitedumper_additional_fields` (
+        `id` INT PRIMARY KEY AUTO_INCREMENT,
+        `content_id` INT NULL,
+        `name` VARCHAR(255) NOT NULL,
+        `value` TEXT NULL,
+        `created_at` DATE NULL,
+        `updated_at` DATE NULL
+    )",
+    /** create table `sitedumper_content` **/
+    'sitedumper_options' => "CREATE TABLE IF NOT EXISTS `sitedumper_options` (
+        `id` INT PRIMARY KEY AUTO_INCREMENT,
+        `name` VARCHAR(255) NOT NULL,
+        `value` TEXT NULL,
+        `created_at` DATE NULL,
+        `updated_at` DATE NULL
+    )"
+];
+
+foreach ($deletes_queries as $table => $sql) {
+    $result = mysqli_query($db, $sql);
+    cheack_db_errors_and_echo_message($db, $table, $result, 'DELETE');
+}
+foreach ($creates_queries as $table => $sql) {
+    $result = mysqli_query($db, $sql);
+    cheack_db_errors_and_echo_message($db, $table, $result, 'CREATE');
+}
