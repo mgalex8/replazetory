@@ -23,7 +23,7 @@ class ContentController extends AbstractController
         $this->validate($request, new ContentValidator(), true);
 
         $command = new ContentParser();
-        $command->parse($request->get('path'));
+        $command->parse($request->get('path'), false);
 
         return new Response(
             ''

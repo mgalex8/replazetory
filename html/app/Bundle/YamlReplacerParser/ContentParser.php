@@ -184,7 +184,7 @@ class ContentParser
      * @param string $filepath
      * @return void
      */
-    public function parse(string $filepath)
+    public function parse(string $filepath, bool $save = true)
     {
         $data = [];
         $inserts = [];
@@ -307,11 +307,16 @@ class ContentParser
                     }
                 }
             }
-            $this->saveUrl($filepath);
-            $this->save($inserts);
+            if ($save) {
+                $this->saveUrl($filepath);
+                $this->save($inserts);
+            }
         }
-//        dump($data);
-//        dump($inserts);
+
+        if (! $save) {
+            dump($data);
+            dump($inserts);
+        }
 
         return $data;
     }
