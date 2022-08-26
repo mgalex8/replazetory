@@ -1,6 +1,8 @@
 <?php
 namespace App\Bundle\Database;
 
+use Symfony\Component\Yaml\Exception\ParseException;
+
 /**
  * Class DBConnection
  */
@@ -115,10 +117,27 @@ class DBConnection
      */
     public function insert(string $table, array $values)
     {
-        array_walk($values, function (&$item, $val) {
-            $item = mysqli_real_escape_string($this->db, $val);
-        });
-        $this->dbQuery('INSERT INTO '.$table.' ('.implode(',', array_keys($values)).') VALUES ('.implode(',', $values).');');
+
+        $fields = $this->select('information_schema.columns', '*', ['table_schema' => $this->getDatabaseName(), 'table_name' => $table ]);
+        if (!$fields) {
+            throw new \Exception(sprintf('Not found fields in table `%s`', $table));
+        }
+
+        $fields = [];
+        foreach ($fields as $field) {
+            $fields[$field['COLUMN_NAME']] = $field;
+        }
+
+        $vals = [];
+        foreach ($values as $key => $value) {
+            if (in_array(strtoupper($fields[$key]['DATA_TYPE']), ['INTEGER', 'INT', 'SMALLINT', 'TINYINT', 'MEDIUMINT', 'BIGINT', 'FLOAT', 'DOUBLE'])) {
+                $vals[] = mysqli_real_escape_string($this->db, $value);
+            } else {
+                $vals[] = '\'' . mysqli_real_escape_string($this->db, $value) . '\'';
+            }
+        }
+
+        $this->dbQuery('INSERT INTO '.$table.' ('.implode(',', array_keys($values)).') VALUES ('.implode(',', $vals).');');
 
         $id = $this->dbQuery('SELECT LAST_INSERT_ID();');
         return $id;

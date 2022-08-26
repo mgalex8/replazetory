@@ -1,10 +1,10 @@
 <?php
-namespace App\Bundle\YamlReplacerParser\Interfaces;
+namespace App\Library\Synonimizer\Filters;
 
 /**
  * IYamlConfigFilter interface
  */
-interface IYamlConfigFilter
+interface IContentFilter
 {
     /**
      * @return void

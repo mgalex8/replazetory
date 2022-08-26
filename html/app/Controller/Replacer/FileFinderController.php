@@ -46,11 +46,12 @@ class FileFinderController extends AbstractController
         $fileFinder = new FileFinder();
         $find_directories = $fileFinder->findDirectories($path);
 
+
         foreach ($find_directories as $directory) {
-            $files = $fileFinder->findFiles($directory, '/\.html/');
-            if (count($files) > 0) {
+//            $files = $fileFinder->findFiles($directory, '/\.html/');
+//            if (count($files) > 0) {
                 $directories[] = $directory;
-            }
+//            }
         }
 
         return new Response(

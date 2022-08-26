@@ -28,9 +28,12 @@ $routes->add('replacer.file.finder',        new Route('/replacer/file/finder', [
 $routes->add('replacer.file.finder.files',  new Route('/replacer/file/finder/files', [ '_controller' => [ new App\Controller\Replacer\FileFinderController(), 'files' ] ] ) );
 
 /** Content routes */
-$routes->add('content.insert_db',           new Route('/content/insert_db', [ '_controller' => [ new App\Controller\Html\ContentController(), 'insert_db' ], [ 'url' => '' ] ] ) );
-$routes->add('content.original',            new Route('/content/original',  [ '_controller' => [ new App\Controller\Html\ContentController(), 'original' ], [ 'url' => '' ] ] ) );
-$routes->add('content.replaced',            new Route('/content/replaced',  [ '_controller' => [ new App\Controller\Html\ContentController(), 'replaced' ], [ 'url' => '' ] ] ) );
+$routes->add('content.insert_db',           new Route('/content/insert_db', [ '_controller' => [ new App\Controller\Html\ContentController(), 'insert_db' ] ] ) );
+$routes->add('content.original',            new Route('/content/original',  [ '_controller' => [ new App\Controller\Html\ContentController(), 'original' ] ] ) );
+$routes->add('content.replaced',            new Route('/content/replaced',  [ '_controller' => [ new App\Controller\Html\ContentController(), 'replaced' ] ] ) );
+
+$routes->add('synonimizer',                 new Route('/synonimizer',       [ '_controller' => [ new App\Controller\Synonimizer\SynonimizerController(), 'synonimizer' ] ] ) );
+
 
 /** Messages routes */
 $routes->add('messages.new',   new Route('/messages/new/{id}',    [ '_controller' => 'App\Controller\Messages\MessageController::new', 'id' => '.+' ] ) );

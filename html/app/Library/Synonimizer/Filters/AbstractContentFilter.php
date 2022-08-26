@@ -1,12 +1,12 @@
 <?php
-namespace App\Bundle\YamlReplacerParser\Filters;
+namespace App\Library\Synonimizer\Filters;
 
 use App\Bundle\YamlReplacerParser\Interfaces\IYamlConfigFilter;
 
 /**
  * Class AbstractContentFilter
  */
-abstract class AbstractContentFilter implements IYamlConfigFilter
+abstract class AbstractContentFilter implements IContentFilter
 {
 
     /**

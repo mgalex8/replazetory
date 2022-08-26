@@ -36,14 +36,6 @@ class ContentFiltrator
     }
 
     /**
-     * @return array
-     */
-    public function getFilters() : array
-    {
-        return $this->filters;
-    }
-
-    /**
      * @param array $filters
      * @return void
      */
@@ -52,6 +44,14 @@ class ContentFiltrator
         foreach ($filters as $name => $filter) {
             $this->setFilter($filter, $name);
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getFilters() : array
+    {
+        return $this->filters;
     }
 
     /**

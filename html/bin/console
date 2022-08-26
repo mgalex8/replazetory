@@ -14,6 +14,7 @@ $application = new Symfony\Component\Console\Application;
 
 // Register all Commands
 $application->add(new \App\Command\ParseIntoDbCommand());
+$application->add(new \App\Command\ResizerCommand());
 
 // Run it
 $application->run();

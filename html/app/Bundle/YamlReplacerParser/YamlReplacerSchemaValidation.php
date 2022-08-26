@@ -5,6 +5,8 @@ use App\Bundle\Database\DBConnection;
 use App\Bundle\YamlReplacerParser\Filters\GetTextContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\MixerBrContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\MixerBrSpecialContentFilter;
+use App\Bundle\YamlReplacerParser\Filters\RemoveScriptContentFilter;
+use App\Bundle\YamlReplacerParser\Filters\SynonimizerContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\TrimContentFilter;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
@@ -48,6 +50,8 @@ class YamlReplacerSchemaValidation
         $this->filtrator->setFilter(new MixerBrContentFilter());
         $this->filtrator->setFilter(new TrimContentFilter());
         $this->filtrator->setFilter(new GetTextContentFilter());
+        $this->filtrator->setFilter(new SynonimizerContentFilter());
+        $this->filtrator->setFilter(new RemoveScriptContentFilter());
     }
 
     /**
