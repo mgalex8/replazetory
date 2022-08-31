@@ -25,6 +25,9 @@ $deletes_queries = [
     'sitedumper_additional_fields'  => 'DROP TABLE IF EXISTS `sitedumper_additional_fields`',
     'sitedumper_options'            => 'DROP TABLE IF EXISTS `sitedumper_options`',
     'wp_posts'                      => 'DROP TABLE IF EXISTS `wp_posts`',
+    'wp_terms'                      => 'DROP TABLE IF EXISTS `wp_terms`',
+    'wp_term_taxonomy'              => 'DROP TABLE IF EXISTS `wp_term_taxonomy`',
+    'wp_term_relationships'         => 'DROP TABLE IF EXISTS `wp_term_relationships`',
 ];
 
 $creates_queries = [
@@ -68,28 +71,51 @@ $creates_queries = [
 
     'wp_posts' => 'CREATE TABLE IF NOT EXISTS `wp_posts` (
         `ID`                    BIGINT UNSIGNED AUTO_INCREMENT               PRIMARY KEY,
-        `post_author`           BIGINT UNSIGNED default 0                       NOT NULL,
-        `post_date`             DATETIME        default \'0000-00-00 00:00:00\' NOT NULL,
-        `post_date_gmt`         DATETIME        default \'0000-00-00 00:00:00\' NOT NULL,
+        `post_author`           BIGINT UNSIGNED DEFAULT 0                       NOT NULL,
+        `post_date`             DATETIME        DEFAULT \'0000-00-00 00:00:00\' NOT NULL,
+        `post_date_gmt`         DATETIME        DEFAULT \'0000-00-00 00:00:00\' NOT NULL,
         `post_content`          LONGTEXT                                        NOT NULL,
         `post_title`            TEXT                                            NOT NULL,
         `post_excerpt`          TEXT                                            NOT NULL,
-        `post_status`           VARCHAR(20)     default \'publish\'             NOT NULL,
-        `comment_status`        VARCHAR(20)     default \'open\'                NOT NULL,
-        `ping_status`           VARCHAR(20)     default \'open\'                NOT NULL,
-        `post_password`         VARCHAR(255)    default \'\'                    NOT NULL,
-        `post_name`             VARCHAR(200)    default \'\'                    NOT NULL,
+        `post_status`           VARCHAR(20)     DEFAULT \'publish\'             NOT NULL,
+        `comment_status`        VARCHAR(20)     DEFAULT \'open\'                NOT NULL,
+        `ping_status`           VARCHAR(20)     DEFAULT \'open\'                NOT NULL,
+        `post_password`         VARCHAR(255)    DEFAULT \'\'                    NOT NULL,
+        `post_name`             VARCHAR(200)    DEFAULT \'\'                    NOT NULL,
         `to_ping`               TEXT                                            NOT NULL,
         `pinged`                TEXT                                            NOT NULL,
-        `post_modified`         DATETIME        default \'0000-00-00 00:00:00\' NOT NULL,
-        `post_modified_gmt`     DATETIME        default \'0000-00-00 00:00:00\' NOT NULL,
+        `post_modified`         DATETIME        DEFAULT \'0000-00-00 00:00:00\' NOT NULL,
+        `post_modified_gmt`     DATETIME        DEFAULT \'0000-00-00 00:00:00\' NOT NULL,
         `post_content_filtered` LONGTEXT                                        NOT NULL,
-        `post_parent`           BIGINT UNSIGNED default 0                       NOT NULL,
-        `guid`                  VARCHAR(255)    default \'\'                    NOT NULL,
-        `menu_order`            INT             default 0                       NOT NULL,
-        `post_type`             VARCHAR(20)     default \'post\'                NOT NULL,
-        `post_mime_type`        VARCHAR(100)    default \'\'                    NOT NULL,
-        `comment_count`         BIGINT          default 0                       NOT NULL
+        `post_parent`           BIGINT UNSIGNED DEFAULT 0                       NOT NULL,
+        `guid`                  VARCHAR(255)    DEFAULT \'\'                    NOT NULL,
+        `menu_order`            INT             DEFAULT 0                       NOT NULL,
+        `post_type`             VARCHAR(20)     DEFAULT \'post\'                NOT NULL,
+        `post_mime_type`        VARCHAR(100)    DEFAULT \'\'                    NOT NULL,
+        `comment_count`         BIGINT          DEFAULT 0                       NOT NULL
+    ) collate = utf8mb4_unicode_ci;',
+
+    'wp_terms' => 'CREATE TABLE IF NOT EXISTS `wp_terms` (
+        `term_id`               BIGINT UNSIGNED AUTO_INCREMENT               PRIMARY KEY,
+        `name`                  VARCHAR(200) default \'\'                       NOT NULL,
+        `slug`                  VARCHAR(200) default \'\'                       NOT NULL,
+        `term_group`            BIGINT(10)   default 0                          NOT NULL
+    ) collate = utf8mb4_unicode_ci;',
+
+    'wp_term_taxonomy' => 'CREATE TABLE IF NOT EXISTS `wp_term_taxonomy` (
+        `term_taxonomy_id`      BIGINT UNSIGNED AUTO_INCREMENT               PRIMARY KEY,
+        `term_id`               BIGINT UNSIGNED DEFAULT 0                       NOT NULL,
+        `taxonomy`              VARCHAR(32)     DEFAULT \'\'                    NOT NULL,
+        `description`           LONGTEXT                                        NOT NULL,
+        `parent`                BIGINT UNSIGNED DEFAULT 0                       NOT NULL,
+        `count`                 BIGINT          DEFAULT 0                       NOT NULL
+    ) collate = utf8mb4_unicode_ci;',
+
+    'wp_term_relationships' => 'CREATE TABLE IF NOT EXISTS `wp_term_relationships` (
+        `object_id`             BIGINT UNSIGNED DEFAULT 0                       NOT NULL,
+        `term_taxonomy_id`      BIGINT UNSIGNED DEFAULT 0                       NOT NULL,
+        `term_order`            INT             DEFAULT 0                       NOT NULL,
+        PRIMARY KEY (object_id, term_taxonomy_id)
     ) collate = utf8mb4_unicode_ci;',
 
 ];

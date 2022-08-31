@@ -55,7 +55,9 @@ class ParseIntoDbCommand extends Command
         $i = 0;
         while ($i++ < $countFiles) {
             try {
-                $this->contentParser->parse($this->files[$i]);
+                if ($this->files[$i]) {
+                    $this->contentParser->parse($this->files[$i]);
+                }
             } catch(\Exception|\Throwable $e) {
                 throw $e;
             } finally {

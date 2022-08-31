@@ -14,7 +14,7 @@ page:
     { xpath: //@href, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
     { xpath: //h1, filters: [ 'get_text', 'trim', 'synonimizer' ], save: { table: 'content', type: 'title', content: '@value' } },
     { xpath: //div[@class='entry-image']/img, save: { table: 'content', type: 'thumbnail', content: '@value' } },
-    { xpath: //div[@class='entry-content'], filters: [ 'trim', 'synonimizer', 'remove_script'], save: { table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Программа лояльности'} },
+    { xpath: //div[@class='entry-content'], filters: [ 'trim', 'synonimizer', 'remove_script'], save: { table: 'content', type: 'content', content: '@value' } },
   ]
 
 

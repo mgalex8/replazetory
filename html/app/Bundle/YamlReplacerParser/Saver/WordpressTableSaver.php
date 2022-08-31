@@ -27,7 +27,10 @@ class WordpressTableSaver implements ISaverInterface
     public function saveToDatabase(array $inserts) : void
     {
         if (isset($inserts['sitedumper_content'])) {
-            $this->save_sitedumper_content($inserts['sitedumper_content']);
+            $post_id = $this->save_sitedumper_content($inserts['sitedumper_content']);
+            if (isset($inserts['sitedumper_content']['taxonomy']) && ! empty($inserts['sitedumper_content']['taxonomy'])) {
+                $this->save_taxonomy($inserts['sitedumper_content']['taxonomy'], $post_id);
+            }
         } elseif (isset($inserts['sitedumper_additional_fields'])) {
             $this->save_sitedumper_additional_filrds($inserts['sitedumper_additional_fields']);
         }
@@ -36,6 +39,7 @@ class WordpressTableSaver implements ISaverInterface
     /**
      * @param array $inserts
      * @return void
+     * @throws \Exception
      */
     public function save_sitedumper_content(array $inserts) : void
     {
@@ -88,6 +92,31 @@ class WordpressTableSaver implements ISaverInterface
     public function save_sitedumper_additional_filrds(array $inserts) : void
     {
         //
+    }
+
+    /**
+     * @param array $inserts
+     * @param int $post_id
+     * @return void
+     * @throws \Exception
+     */
+    public function save_taxonomy(array $inserts, int $post_id) : void
+    {
+        $rows = $this->db->select('wp_terms', 'id', ['name' => $inserts['taxonomy']['name']]);
+        if (count($rows) === 0) {
+            $term_id = $this->db->insert('wp_terms', [
+                'name' => $inserts['name'],
+                'slug' => \URLify::slug($inserts['name']),
+            ]);
+            $term_taxonomy_id = $this->db->insert('wp_term_taxonomy', [
+                'term_id' => $term_id,
+                'taxonomy' => $inserts['taxonomy'],
+            ]);
+            $this->db->insert('wp_term_relationships', [
+                'object_id' => $post_id,
+                'term_taxonomy_id' => $term_taxonomy_id,
+            ]);
+        }
     }
 
 }

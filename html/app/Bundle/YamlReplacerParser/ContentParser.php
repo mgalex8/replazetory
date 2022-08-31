@@ -182,9 +182,9 @@ class ContentParser
 
     /**
      * @param string $filepath
-     * @return void
+     * @return array
      */
-    public function parse(string $filepath, bool $save = true)
+    public function parse(string $filepath, bool $save = true) : array
     {
         $data = [];
         $inserts = [];
@@ -261,6 +261,15 @@ class ContentParser
 
                         /** save to database **/
                         if (isset($matches['save'])) {
+                            // taxonomy
+                            $taxonomy = [];
+                            if (isset($matches['save']['taxonomy']) && isset($matches['save']['taxonomy_name'])) {
+                                $taxonomy = [
+                                    'taxonomy' => $matches['save']['taxonomy'],
+                                    'name' => $matches['save']['taxonomy_name'],
+                                ];
+                            }
+
                             //savw
                             $table = str_contains($matches['save']['table'], 'sitedumper_') ? $matches['save']['table'] : 'sitedumper_'.$matches['save']['table'];
                             if ($table === 'sitedumper_content') {
@@ -281,6 +290,7 @@ class ContentParser
                                     'content' => $content_replacer,
 //                                    'title' => $data['title'] ?: null,
                                     'created_at' => date('Y-m-d H:i:s'),
+                                    'taxonomy' => $taxonomy,
                                 ];
 //                                $this->doInsert($table, $insertableData);
                                 $item['inserts'][$table][] = $insertableData;
@@ -292,6 +302,7 @@ class ContentParser
                                     'value' => $content_replacer,
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => null,
+                                    'taxonomy' => $taxonomy,
                                 ];
 //                                $this->doInsert($table, $insertableData);
                                 $item['inserts'][$table][] = $insertableData;

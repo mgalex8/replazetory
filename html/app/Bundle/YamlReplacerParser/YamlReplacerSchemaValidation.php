@@ -174,7 +174,7 @@ class YamlReplacerSchemaValidation
                                     $field_names[] = $field['COLUMN_NAME'];
                                 }
                                 foreach ($matches['save'] as $param => $value) {
-                                    if ($param !== 'table' && ! in_array($param, $field_names)) {
+                                    if ($param !== 'table' && $param !== 'taxonomy' && $param !== 'taxonomy_name' && ! in_array($param, $field_names)) {
                                         throw new ParseException(sprintf('XPath: %1$s Parameter `%4$s` on %2$s.matches.%3$d.save not exists in table %5$s, please setup %2$s.matches.%3$d.save.%4$s parameter on yml config', $matches['xpath'], $key, $matchesindex, $param, $table));
                                     }
                                 }
