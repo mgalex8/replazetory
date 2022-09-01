@@ -2,22 +2,23 @@
 namespace App\Bundle\YamlReplacerParser;
 
 use App\Bundle\Database\DBConnection;
-use App\Bundle\YamlReplacerParser\Filters\GetTextContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\MixerBrContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\MixerBrSpecialContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\RemoveScriptContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\SynonimizerContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\TrimContentFilter;
 use App\Bundle\YamlReplacerParser\Interfaces\ISaverInterface;
 use App\Bundle\YamlReplacerParser\Saver\SitedumperTableSaver;
 use App\Bundle\YamlReplacerParser\Saver\UrlSaver;
 use App\Bundle\YamlReplacerParser\Saver\WordpressTableSaver;
+use App\Bundle\YamlReplacerParser\Traits\ContentFiltratorSetup;
+use App\Bundle\YamlReplacerParser\Traits\DatabaseSetup;
 use DOMWrap\Document;
 use App\Library\HtmlDomParser\HtmlParser;
 use Symfony\Component\Finder\Finder;
 
 class ContentParser
 {
+
+    /**
+     * use section
+     */
+    use ContentFiltratorSetup, DatabaseSetup;
 
     /**
      * @var Finder
@@ -87,31 +88,9 @@ class ContentParser
     /**
      * @return void
      */
-    protected function create_db()
-    {
-        $this->db = new DBConnection("mysql", 'user1', '1234', 'er2night_db');
-    }
-
-    /**
-     * @return void
-     */
     protected function create_finder()
     {
         $this->finder = new Finder();
-    }
-
-    /**
-     * @return void
-     */
-    protected function create_filtrator()
-    {
-        $this->filtrator = new ContentFiltrator();
-        $this->filtrator->setFilter(new MixerBrSpecialContentFilter());
-        $this->filtrator->setFilter(new MixerBrContentFilter());
-        $this->filtrator->setFilter(new TrimContentFilter());
-        $this->filtrator->setFilter(new GetTextContentFilter());
-        $this->filtrator->setFilter(new SynonimizerContentFilter());
-        $this->filtrator->setFilter(new RemoveScriptContentFilter());
     }
 
     /**
@@ -182,7 +161,9 @@ class ContentParser
 
     /**
      * @param string $filepath
+     * @param bool $save
      * @return array
+     * @throws \Exception
      */
     public function parse(string $filepath, bool $save = true) : array
     {

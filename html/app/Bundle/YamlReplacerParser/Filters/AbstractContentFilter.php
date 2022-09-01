@@ -36,32 +36,20 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
      */
     protected function setOptionValidator(string $name, $value = null, $validator_functions = null) : void
     {
-        $this->options[$name] = [
-            'value' => $value,
-            'validators' => $this->__explode_validators($name, $validator_functions),
-        ];
-    }
-
-    /**
-     * Explode validators as array
-     * @param string $name
-     * @param string|null $validator_functions
-     * @return array
-     */
-    protected function __explode_validators(string $name, ?string $validator_functions = null) : array
-    {
-        if (is_string($validator_functions)) {
-            $validator_functions = explode('|', $validator_functions);
-        } elseif (is_array($validator_functions)) {
-            $validator_functions = $validator_functions;
-        } elseif ($validator_functions === null && isset($this->options[$name])) {
-            $validator_functions = $this->options[$name]['validators'];
+        if ($validator_functions) {
+            $this->options[$name] = [
+                'value' => $value,
+                'validators' => $this->__explode_validators($name, $validator_functions),
+            ];
+        } elseif ($this->hasOption($this->options, $name)) {
+            $this->options[$name]['value'] = $value;
         } else {
-            $validator_functions = [];
+            $this->options[$name] = [
+                'value' => $value,
+                'validators' => [],
+            ];
         }
-        return $validator_functions;
     }
-
 
     /**
      * Duplicate function setOptionValidator with other name setOption
@@ -75,25 +63,35 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
         $this->setOptionValidator($name, $value, $validator_functions);
     }
 
-
     /**
+     * Set many options all
      * @param array $options
+     * @param array $validator_functions_array
      * @return void
      */
-    public function setOptionsAll(array $options = []) : void
+    public function setOptionsAll(array $options = [], array $validator_functions_array = array()) : void
     {
-        foreach ($options as $name => $option) {
-            if (isset($this->options[$name]) && $this->validateOption($option)) {
-                $this->setOption($name, $option);
+        $index = 0;
+        foreach ($options as $name => $value) {
+            if ($this->hasOption($this->options, $name)) {
+                if ($validator_functions_array && $this->validateOption($name, $value, $validator_functions_array[$index])) {
+                    $this->setOption($name, $value, $validator_functions_array[$index]);
+                } elseif (! $validator_functions_array && $this->validateOption($name, $value, $this->options[$name]['validators'])) {
+                    $this->setOption($name, $value, $this->options[$name]['validators']);
+                }
             }
+            $index++;
         }
     }
 
     /**
-     * @param array $options
+     * Validate option once
+     * @param $name
+     * @param $value
+     * @param $validator_functions
      * @return bool
      */
-    public function validateOption($name, $value, $validator_functions = null) : bool
+    public function validateOption($name, $value = null, $validator_functions = null) : bool
     {
         $valid = true;
 
@@ -101,7 +99,7 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
          * Validation all functions
          */
         if ($validator_functions !== null) {
-            $validator_functions = $this->__explode_validators($name);
+            $validator_functions = $this->__explode_validators($name, $validator_functions);
         } elseif (isset($this->options[$name])) {
             $validator_functions = $this->options[$name]['validators'];
         } else {
@@ -122,6 +120,26 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
          * Return bool value
          */
         return $valid;
+    }
+
+    /**
+     * Explode validators as array
+     * @param string $name
+     * @param string|array|null $validator_functions
+     * @return array
+     */
+    protected function __explode_validators(string $name, $validator_functions = null) : array
+    {
+        if (is_string($validator_functions)) {
+            $validator_functions = explode('|', $validator_functions);
+        } elseif (is_array($validator_functions)) {
+            $validator_functions = $validator_functions;
+        } elseif ($validator_functions === null && isset($this->options[$name])) {
+            $validator_functions = $this->options[$name]['validators'];
+        } else {
+            $validator_functions = [];
+        }
+        return $validator_functions;
     }
 
     /**
@@ -147,6 +165,7 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
     }
 
     /**
+     * Has option in array $options with $name
      * @param array $options
      * @param string $name
      * @return bool
@@ -157,9 +176,11 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
     }
 
     /**
+     * Check options equal
      * @param array $options
      * @param string $name
      * @param $value
+     * @param bool $district
      * @return bool
      */
     public function optionEqual(array $options = [], string $name, $value, bool $district = true)
@@ -168,6 +189,7 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
     }
 
     /**
+     * Set filter name
      * @param string $name
      * @return void
      */
@@ -177,6 +199,7 @@ abstract class AbstractContentFilter implements IYamlConfigFilter
     }
 
     /**
+     * Get filter name
      * @return string
      */
     public function getName() : string

@@ -2,12 +2,8 @@
 namespace App\Bundle\YamlReplacerParser;
 
 use App\Bundle\Database\DBConnection;
-use App\Bundle\YamlReplacerParser\Filters\GetTextContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\MixerBrContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\MixerBrSpecialContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\RemoveScriptContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\SynonimizerContentFilter;
-use App\Bundle\YamlReplacerParser\Filters\TrimContentFilter;
+use App\Bundle\YamlReplacerParser\Traits\ContentFiltratorSetup;
+use App\Bundle\YamlReplacerParser\Traits\DatabaseSetup;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -16,6 +12,10 @@ use Symfony\Component\Yaml\Yaml;
  */
 class YamlReplacerSchemaValidation
 {
+    /**
+     * use section
+     */
+    use ContentFiltratorSetup, DatabaseSetup;
 
     /**
      * @var string
@@ -43,15 +43,8 @@ class YamlReplacerSchemaValidation
     public function __construct(string $yaml_file_path)
     {
         $this->yaml_file_path = $yaml_file_path;
-        $this->db = new DBConnection("mysql", 'user1', '1234', 'er2night_db');
-
-        $this->filtrator = new ContentFiltrator();
-        $this->filtrator->setFilter(new MixerBrSpecialContentFilter());
-        $this->filtrator->setFilter(new MixerBrContentFilter());
-        $this->filtrator->setFilter(new TrimContentFilter());
-        $this->filtrator->setFilter(new GetTextContentFilter());
-        $this->filtrator->setFilter(new SynonimizerContentFilter());
-        $this->filtrator->setFilter(new RemoveScriptContentFilter());
+        $this->create_db();
+        $this->create_filtrator();
     }
 
     /**
