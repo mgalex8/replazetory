@@ -193,6 +193,7 @@ class ContentParser
                         $item['matches']['xpath_found'] = 0;
                         $content_original = '';
                         $content_replacer = '';
+                        $content_original_filtrated = '';
                         foreach ($xp->query($matches['xpath']) as $node) {
                             if ($node instanceof \DOMAttr) {
                                 $content_original = $node->textContent;
@@ -205,7 +206,8 @@ class ContentParser
                             /** apply filters **/
                             $content_replacer = $content_original;
                             if (! empty($item['matches']['filters'])) {
-                                $content_replacer = $this->filterContent($content_original, $item['matches']['filters']);
+                                $content_replacer = $this->filterContent($content_original, $item['matches']['filters'], false);
+                                $content_original_filtrated = $this->filterContent($content_original, $item['matches']['filters'], true);
                                 $rpl['from'] = $content_original;
                                 $rpl['to'] = $content_replacer;
                                 $rpl['filters'] = array_keys($item['matches']['filters']);
@@ -238,18 +240,34 @@ class ContentParser
                                 $item_replacers[] = $rpl;
                             }
                         }
-//                        dump($rpl);
 
                         /** save to database **/
                         if (isset($matches['save'])) {
                             // taxonomy
-                            $taxonomy = [];
-                            if (isset($matches['save']['taxonomy']) && isset($matches['save']['taxonomy_name'])) {
-                                $taxonomy = [
-                                    'taxonomy' => $matches['save']['taxonomy'],
-                                    'name' => $matches['save']['taxonomy_name'],
-                                ];
+                            $taxonomies = [];
+                            if (isset($matches['save']['taxonomy'])) {
+                                if (is_array($matches['save']['taxonomy_name']) && isset($matches['save']['taxonomy_name']['xpath'])) {
+                                    foreach ($xp->query($matches['save']['taxonomy_name']['xpath']) as $taxonomy_name) {
+                                        $taxonomies[] = [
+                                            'taxonomy' => $matches['save']['taxonomy'],
+                                            'name' => $taxonomy_name->textContent,
+                                            'slug' => isset($matches['save']['taxonomy_slug']) ? $matches['save']['taxonomy_slug'] : null,
+                                        ];
+                                    }
+                                } else {
+                                    $taxonomies[] = [
+                                        'taxonomy' => $matches['save']['taxonomy'],
+                                        'name' => isset($matches['save']['taxonomy_name']) ? $matches['save']['taxonomy_name'] : null,
+                                        'slug' => isset($matches['save']['taxonomy_slug']) ? $matches['save']['taxonomy_slug'] : null,
+                                    ];
+                                }
                             }
+
+                            $max_ids = [
+                                'post_id' => isset($matches['save']['max_id']) ? $matches['save']['max_id'] : null,
+                                'term_id' => isset($matches['save']['max_term_id']) ? $matches['save']['max_term_id'] : null,
+                                'term_taxonomy_id' => isset($matches['save']['max_term_taxonomy_id']) ? $matches['save']['max_term_taxonomy_id'] : null,
+                            ];
 
                             //savw
                             $table = str_contains($matches['save']['table'], 'sitedumper_') ? $matches['save']['table'] : 'sitedumper_'.$matches['save']['table'];
@@ -269,9 +287,12 @@ class ContentParser
                                     'hash' => $parent_id == null ? $hash : null,
                                     'url' => $parent_id === null ? $url : null,
                                     'content' => $content_replacer,
-//                                    'title' => $data['title'] ?: null,
+                                    'save_original' => (bool) $matches['save']['save_original'],
+                                    'original' => $content_original_filtrated,
+                                    'title' => $data['title'] ?: null,
                                     'created_at' => date('Y-m-d H:i:s'),
-                                    'taxonomy' => $taxonomy,
+                                    'taxonomies' => $taxonomies,
+                                    'max_ids' => $max_ids,
                                 ];
 //                                $this->doInsert($table, $insertableData);
                                 $item['inserts'][$table][] = $insertableData;
@@ -283,7 +304,7 @@ class ContentParser
                                     'value' => $content_replacer,
                                     'created_at' => date('Y-m-d H:i:s'),
                                     'updated_at' => null,
-                                    'taxonomy' => $taxonomy,
+                                    'taxonomies' => $taxonomies,
                                 ];
 //                                $this->doInsert($table, $insertableData);
                                 $item['inserts'][$table][] = $insertableData;
@@ -347,15 +368,48 @@ class ContentParser
     /**
      * @param string $content
      * @param array $filters
-     * @return void
+     * @param bool $original
+     * @return string|null
+     * @throws \Exception
      */
-    protected function filterContent(string $content, array $filters = [])
+    protected function filterContent(string $content, array $filters = [], bool $original = false)
     {
         $result = $content;
         foreach ($filters as $filter_name => $filter_options) {
-            $result = $this->filtrator->filter($result, $filter_name, $filter_options);
+            $fitrated = true;
+            if (isset($filter_options['original'])) {
+                if ($original) {
+                    $fitrated = $original && $filter_options['original'];
+                }
+                unset($filter_options['original']);
+            }
+
+            if (isset($filter_options['many'])) {
+                foreach ($filter_options['many'] as $many) {
+                    $result = $this->filterOnce($result, $filter_name, $many, $fitrated);
+                }
+            } else {
+                $result = $this->filterOnce($result, $filter_name, $filter_options, $fitrated);
+            }
         }
         return $result;
+    }
+
+    /**
+     * @param string $content
+     * @param string $filter_name
+     * @param array $options
+     * @param bool $fitrated
+     * @return void
+     * @throws \Exception
+     */
+    protected function filterOnce(string $content, string $filter_name, array $options = [], bool $fitrated = false)
+    {
+        if ($fitrated) {
+            return $this->filtrator->filter($content, $filter_name, $options);
+        } else {
+            return $content;
+        }
     }
 
     /**

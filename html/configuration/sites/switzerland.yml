@@ -1,0 +1,36 @@
+#all:
+#  directory: '*'
+#  matches: [
+#    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+#    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+#  ]
+#  processing: 'false'
+
+page:
+  directory: /^\/priroda-shvejtsarii\//
+  type: post,
+  matches: [
+#    { xpath: //@src, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
+#    { xpath: //@href, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
+    { xpath: //h1, filters: [ 'get_text', 'trim', 'syn' ], save: { table: 'content', type: 'title', content: '@value' } },
+    { xpath: //div[@class='featured-area']/img, save: { table: 'content', type: 'thumbnail', content: '@value' } },
+    { xpath: //div[@class='entry-content' and @class='entry'], filters: [ { trim: {}, remove_script: {}, clearfix_image: {}, synonimizer: {}, remove_xpath: { xpath: "//div[contains(attribute::class, 'extravote')]"} } ], replacers: [ { from: '/images\/+/i', to: '/images/' } ], save: { table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Пятерочка'} },
+    { xpath: //article/div[2],
+#      filters: [ { trim: {}, remove_script: {}, clearfix_image: {}, synonimizer: {}, remove_xpath: { xpath: "//div[contains(attribute::class, 'extravote')]"} } ],
+      replacers: [
+        { from: '/https\:\/\/business-swiss\.ch\//i', to: '/' },
+        { from: '/priroda-shvejtsarii/', to: 'Switzerland/travel/priroda' }
+        { from: '/gory-shvejtsarii/', to: 'gory' }
+        { from: '/e-mmental-skie-al-py/', to: 'Emmentalskie-Alpy' }
+        { from: '/shvejtsarskie-al-py/', to: 'Switzerland-Alpys' }
+      ],
+      save: {
+        table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Пятерочка'
+      }
+    },
+  ]
+
+
+
+
+

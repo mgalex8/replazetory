@@ -93,6 +93,8 @@ class SynonimizerContentFilter extends AbstractContentFilter implements IYamlCon
             $content = str_replace($this->getTemplate($index), $texttemplates[$index], $content);
         }
 
+        $content = str_replace('<?xml encoding="UTF-8"><domwrap></domwrap>', '', $content);
+
         return $content;
     }
 
@@ -110,7 +112,7 @@ class SynonimizerContentFilter extends AbstractContentFilter implements IYamlCon
         foreach ($texttemplates as $index => $template) {
             if (!empty(trim($template))) {
                 $synonims[$index] = $template;
-                $synonimstext .= $this->getTemplate($index)."=\"".$template."\"".PHP_EOL;
+                $synonimstext .= $this->getTemplate($index)."=".$template.PHP_EOL;
             }
         }
         return $this->synonimizer->synonimize($synonimstext);

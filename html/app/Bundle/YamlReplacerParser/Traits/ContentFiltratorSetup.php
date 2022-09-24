@@ -7,8 +7,10 @@ use App\Bundle\YamlReplacerParser\Filters\ClearfxTagImageContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\GetTextContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\MixerBrContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\MixerBrSpecialContentFilter;
+use App\Bundle\YamlReplacerParser\Filters\RemoveCommentsContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\RemoveScriptContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\RemoveXPathContentFilter;
+use App\Bundle\YamlReplacerParser\Filters\SynContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\SynonimizerContentFilter;
 use App\Bundle\YamlReplacerParser\Filters\TrimContentFilter;
 
@@ -28,8 +30,10 @@ trait ContentFiltratorSetup
         $this->filtrator->setFilter(new MixerBrContentFilter());
         $this->filtrator->setFilter(new TrimContentFilter());
         $this->filtrator->setFilter(new GetTextContentFilter());
+        $this->filtrator->setFilter(new SynContentFilter());
         $this->filtrator->setFilter(new SynonimizerContentFilter());
         $this->filtrator->setFilter(new RemoveScriptContentFilter());
+        $this->filtrator->setFilter(new RemoveCommentsContentFilter());
         $this->filtrator->setFilter(new ClearfxTagImageContentFilter());
         $this->filtrator->setFilter(new RemoveXPathContentFilter());
     }

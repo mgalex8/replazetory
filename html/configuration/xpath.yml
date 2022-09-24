@@ -1,20 +1,58 @@
-all:
-  directory: '*'
-  matches: [
-    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
-    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
-  ]
-  processing: 'false'
+#all:
+#  directory: '*'
+#  matches: [
+#    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+#    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+#  ]
+#  processing: 'false'
 
 page:
-  directory: /^\/akcii\/[\d]+(.*?)$/
+  directory: /^\/(.*?)$/
   type: post,
+  processing: 'true'
   matches: [
     { xpath: //@src, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
     { xpath: //@href, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
-    { xpath: //h1, filters: [ 'get_text', 'trim', 'synonimizer' ], save: { table: 'content', type: 'title', content: '@value' } },
-    { xpath: //div[@class='item-page']/div[@itemprop='articleBody'], filters: [ { trim: {}, remove_script: {}, clearfix_image: {}, synonimizer: {}, remove_xpath: { xpath: "//div[contains(attribute::class, 'extravote')]"} } ], replacers: [ { from: '/images\/+/i', to: '/images/' } ], save: { table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Пятерочка'} },
-    { xpath: //div[@class='entry-content'], filters: [ 'trim', 'synonimizer', 'remove_script'], save: { table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Программа лояльности'} },
+    { xpath: //h1, filters: [ 'get_text', 'trim'], save: { table: 'content', type: 'title', content: '@value' } },
+    { xpath: //div[@class='item-page'],
+      filters: [ {
+        trim: { original: 1 },
+        remove_script: { original: 1 },
+        remove_comments: { original: 1 },
+        clearfix_image: { original: 1 },
+        remove_xpath: { original: 1,
+          many: [
+            { xpath: "//h1" },
+            { xpath: "//p[1]" },
+            { xpath: "//link" },
+            { xpath: "//script" },
+            { xpath: "//img" },
+            { xpath: "//div/comment" }
+          ]
+        },
+        synonimizer: { original: 0 },
+      } ],
+      replacers: [
+        { from: '/\<p\>\"\s+\<\/p>/', to: '' },
+        { from: '/\<p\>\" \"<\/p\>/', to: '' },
+        { from: '/\<p\>\"\s\"\<\/p\>/', to: '' },
+        { from: '/\n\n/', to: '' },
+      ],
+      save: {
+        table: 'content',
+        type: 'content',
+        content: '@value',
+        save_original: 1,
+        taxonomy: 'category',
+        taxonomy_name: { xpath: //div[@class='item-page']/p[1]/span/strong/a[2], },
+        max_id: 33,
+        max_term_id: 39,
+        max_term_taxonomy_id: 46
+      }
+    },
   ]
+
+
+
 
 

@@ -1,0 +1,32 @@
+all:
+  directory: '*'
+  matches: [
+    { xpath: //@src, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+    { xpath: //@href, replacers: [ { from: /(\.\.\/)+/i, to: / } ] },
+  ]
+  processing: 'false'
+
+adresa:
+  directory: /\/adresa\//
+  type: post,
+  matches: [
+    { xpath: //@src, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
+    { xpath: //@href, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
+    { xpath: //h1, filters: [ 'get_text', 'trim', 'syn' ], save: { table: 'content', type: 'title', content: '@value' } },
+    { xpath: //div[ @class='item-page' ]/div[ @itemprop='articleBody' ], filters: [ { trim: { }, remove_script: { }, clearfix_image: { }, synonimizer: { }, remove_xpath: { xpath: "//div[contains(attribute::class, 'extravote')]" } } ], replacers: [ { from: '/images\/+/i', to: '/images/' } ], save: { table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Адреса магазинов', taxonomy_slug: 'adresa', max_id: 395, max_term_id: 206, max_term_taxonomy_id: 206 } },
+  ]
+
+page:
+  directory: /^\/akcii\/[\d]+(.*?)$/
+  type: post,
+  matches: [
+    { xpath: //@src, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
+    { xpath: //@href, replacers: [ { from: '/(\.\.\/)+/i', to: '/' } ] },
+    { xpath: //h1, filters: [ 'get_text', 'trim', 'syn' ], save: { table: 'content', type: 'title', content: '@value' } },
+    { xpath: //div[@class='item-page']/div[@itemprop='articleBody'], filters: [ { trim: {}, remove_script: {}, clearfix_image: {}, synonimizer: {}, remove_xpath: { xpath: "//div[contains(attribute::class, 'extravote')]"} } ], replacers: [ { from: '/images\/+/i', to: '/images/' } ], save: { table: 'content', type: 'content', content: '@value', taxonomy: 'category', taxonomy_name: 'Пятерочка'} },
+  ]
+
+
+
+
+

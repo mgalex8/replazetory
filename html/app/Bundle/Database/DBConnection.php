@@ -114,18 +114,21 @@ class DBConnection
      * @param string $table
      * @param array $values
      * @return string|int|null
+     * @throws \Exception
      */
     public function insert(string $table, array $values)
     {
-
-        $fields = $this->select('information_schema.columns', '*', ['table_schema' => $this->getDatabaseName(), 'table_name' => $table ]);
-        if (!$fields) {
-            throw new \Exception(sprintf('Not found fields in table `%s`', $table));
-        }
+        $selectFields = $this->selectInformationSchemaFields($table);
+        $idName = null;
 
         $fields = [];
-        foreach ($fields as $field) {
-            $fields[$field['COLUMN_NAME']] = $field;
+        foreach ($selectFields as $field) {
+            if (isset($field['COLUMN_NAME'])) {
+                $fields[$field['COLUMN_NAME']] = $field;
+                if ($field['COLUMN_KEY'] == 'PRI') {
+                    $idName = $field['COLUMN_NAME'];
+                }
+            }
         }
 
         $vals = [];
@@ -139,14 +142,30 @@ class DBConnection
 
         $this->dbQuery('INSERT INTO '.$table.' ('.implode(',', array_keys($values)).') VALUES ('.implode(',', $vals).');');
 
-        $id = $this->dbQuery('SELECT LAST_INSERT_ID();');
+        $id = null;
+        if ($idName) {
+            $result = $this->dbQuery('SELECT MAX('.$idName.') AS maxdata FROM '.$table.';');
+            if (mysqli_num_rows($result) > 0) {
+                $fetch = mysqli_fetch_assoc($result);
+                $id = $fetch['maxdata'];
+            }
+        } else {
+            $result = $this->dbQuery('SELECT LAST_INSERT_ID() AS last_id;');
+            if (mysqli_num_rows($result) > 0) {
+                $fetch = mysqli_fetch_assoc($result);
+                $id = $fetch['last_id'];
+            }
+        }
+
         return $id;
     }
 
     /**
-     * @param string|array $table
+     * @param string $table
+     * @param string|array $fields
      * @param string|array $conditions
      * @return array
+     * @throws \Exception
      */
     public function select(string $table, $fields = '*', $conditions = '')
     {
@@ -172,7 +191,8 @@ class DBConnection
     /**
      * @param string $table
      * @param string|array $conditions
-     * @return bool
+     * @return bool|\mysqli_result
+     * @throws \Exception
      */
     public function delete(string $table, $conditions = '')
     {
@@ -181,6 +201,21 @@ class DBConnection
         }
         $result = $this->dbQuery('DELETE FROM '.$table. ($conditions ? " WHERE ". $conditions : '') . ';');
         return $result;
+    }
+
+    /**
+     * @param string $table
+     * @param string|array $fields
+     * @return array
+     * @throws \Exception
+     */
+    public function selectInformationSchemaFields(string $table, $fields = '*')
+    {
+        $selectFields = $this->select('information_schema.columns', $fields, ['table_schema' => $this->getDatabaseName(), 'table_name' => $table ]);
+        if (! $selectFields) {
+            throw new \Exception(sprintf('Not found fields in table `%s`', $table));
+        }
+        return $selectFields;
     }
 
     /**
